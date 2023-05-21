@@ -11,7 +11,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
 @AllArgsConstructor
-public class TelegramBot extends TelegramLongPollingBot {
+public class BotController extends TelegramLongPollingBot {
 
     private final BotConfig botConfig;
 
@@ -38,8 +38,9 @@ public class TelegramBot extends TelegramLongPollingBot {
             if ("/start".equals(messageText)) {
                 startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
             } else {
-                reply = (messageText.contains("$") || messageText.contains("тенге")) ?
-                        currencyService.getUsdToKztRate().toString() : "Error";
+                reply = ((messageText.contains("$") && messageText.length() > 1) ||
+                        (messageText.contains("тенге") && messageText.length() > 5)) ?
+                        currencyService.currencyExchange(messageText) : "Please enter value in $ or тенге.";
                 sendMessage(chatId, reply);
             }
         }

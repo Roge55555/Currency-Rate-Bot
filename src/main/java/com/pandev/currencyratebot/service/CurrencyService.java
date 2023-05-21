@@ -7,4 +7,6 @@ public interface CurrencyService {
      CurrencyModel getCurrency(String message);
 
      Double getUsdToKztRate();
+
+     String currencyExchange(String takenValue);
 }

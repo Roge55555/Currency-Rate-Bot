@@ -1,6 +1,7 @@
-package com.pandev.currencyratebot.service;
+package com.pandev.currencyratebot.service.impl;
 
 import com.pandev.currencyratebot.model.CurrencyModel;
+import com.pandev.currencyratebot.service.CurrencyService;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,7 @@ import java.util.Scanner;
 
 @Service
 @RequiredArgsConstructor
-public class CurrencyServiceImpl implements CurrencyService{
+public class CurrencyServiceImpl implements CurrencyService {
 
     @Override
     public CurrencyModel getCurrency(String message) {
@@ -45,5 +46,15 @@ public class CurrencyServiceImpl implements CurrencyService{
     @Override
     public Double getUsdToKztRate() {
         return 1000 / getCurrency("kzt").getCurrencyOfficialRate() * getCurrency("usd").getCurrencyOfficialRate();
+    }
+
+    @Override
+    public String currencyExchange(String takenValue) {
+
+        if (takenValue.contains("$")) {
+            return String.format("%,.2f", Double.parseDouble(takenValue.replace("$", "")) * getUsdToKztRate()) + " тенге";
+        } else {
+            return String.format("%,.2f", Double.parseDouble(takenValue.replace("тенге", "")) / getUsdToKztRate()) + "$";
+        }
     }
 }

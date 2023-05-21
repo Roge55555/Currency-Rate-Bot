@@ -1,6 +1,6 @@
 package com.pandev.currencyratebot.model;
 
-import com.pandev.currencyratebot.controller.TelegramBot;
+import com.pandev.currencyratebot.controller.BotController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -11,18 +11,18 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 @Component
 public class BotInitializer {
-    private final TelegramBot telegramBot;
+    private final BotController botController;
 
     @Autowired
-    public BotInitializer(TelegramBot telegramBot) {
-        this.telegramBot = telegramBot;
+    public BotInitializer(BotController botController) {
+        this.botController = botController;
     }
 
     @EventListener({ContextRefreshedEvent.class})
     public void init()throws TelegramApiException {
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
         try{
-            telegramBotsApi.registerBot(telegramBot);
+            telegramBotsApi.registerBot(botController);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
