@@ -27,11 +27,29 @@ public class SpeechToTextServiceImpl implements SpeechToTextService {
             String result = recognizer.getResult().getHypothesis();
             recognizer.stopRecognition();
 
-            return result;
+            return convertSpelledOutNumbersToNumerals(result);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         return "Convert exception";
+    }
+
+    private String convertSpelledOutNumbersToNumerals(String text) {
+        String[] words = text.split("\\s+");
+        StringBuilder result = new StringBuilder();
+
+        for (String word : words) {
+            String trimmedWord = word.trim();
+            try {
+                int number = new WrittenNumberToNumeralConverter().parse(trimmedWord);
+                result.append(number);
+            } catch (NumberFormatException e) {
+                result.append(trimmedWord);
+            }
+            result.append(" ");
+        }
+
+        return result.toString().trim();
     }
 }
