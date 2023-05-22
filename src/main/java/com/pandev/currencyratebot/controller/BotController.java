@@ -2,12 +2,23 @@ package com.pandev.currencyratebot.controller;
 
 import com.pandev.currencyratebot.config.BotConfig;
 import com.pandev.currencyratebot.service.CurrencyService;
+import com.pandev.currencyratebot.service.SpeechToTextService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Objects;
 
 @Component
 @AllArgsConstructor
@@ -16,6 +27,8 @@ public class BotController extends TelegramLongPollingBot {
     private final BotConfig botConfig;
 
     private final CurrencyService currencyService;
+
+    private final SpeechToTextService speechToTextService;
 
     @Override
     public String getBotUsername() {
@@ -29,7 +42,7 @@ public class BotController extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        String reply;
+        String reply = "";
 
         if(update.hasMessage() && update.getMessage().hasText()){
             String messageText = update.getMessage().getText();
@@ -37,12 +50,35 @@ public class BotController extends TelegramLongPollingBot {
 
             if ("/start".equals(messageText)) {
                 startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
+            } else if ("/convert".equals(messageText)) {
+
+                try {
+                    File tempFile = File.createTempFile("file", ".wav");
+
+                    byte[] content = null;
+                    try {
+                        content = Files.readAllBytes(Path.of("src/main/resources/example.wav"));
+                    } catch (final IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    MultipartFile file = new MockMultipartFile("example.wav", "example.wav", "audio/wave", content);
+                    file.transferTo(tempFile);
+                    String text = speechToTextService.convertAudioToText(tempFile);
+                    tempFile.delete();
+
+                    reply = text;
+                } catch (IOException e) {
+                    reply = "Error converting audio to text";
+                }
+
             } else {
                 reply = ((messageText.contains("$") && messageText.length() > 1) ||
                         (messageText.contains("тенге") && messageText.length() > 5)) ?
                         currencyService.currencyExchange(messageText) : "Please enter value in $ or тенге.";
-                sendMessage(chatId, reply);
             }
+
+            sendMessage(chatId, reply);
         }
 
     }

@@ -53,6 +53,21 @@
 			<version>20230227</version>
 		</dependency>
 
+		<dependency>
+			<groupId>edu.cmu.sphinx</groupId>
+			<artifactId>sphinx4-core</artifactId>
+			<version>5prealpha-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>edu.cmu.sphinx</groupId>
+			<artifactId>sphinx4-data</artifactId>
+			<version>5prealpha-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -60,6 +75,7 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>3.0.4</version>
 				<configuration>
 					<excludes>
 						<exclude>
