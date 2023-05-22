@@ -57,7 +57,7 @@ public class BotController extends TelegramLongPollingBot {
 
                     byte[] content = null;
                     try {
-                        content = Files.readAllBytes(Path.of("src/main/resources/example.wav"));
+                        content = Files.readAllBytes(Path.of("src/main/resources/fulltest.wav"));
                     } catch (final IOException e) {
                         e.printStackTrace();
                     }

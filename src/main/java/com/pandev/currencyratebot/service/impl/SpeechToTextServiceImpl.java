@@ -8,6 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +31,7 @@ public class SpeechToTextServiceImpl implements SpeechToTextService {
             String result = recognizer.getResult().getHypothesis();
             recognizer.stopRecognition();
 
-            return convertSpelledOutNumbersToNumerals(result);
+            return convertSpelledNumericalDigitsToNumber(convertSpelledOutNumbersToNumerals(result));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -35,7 +39,8 @@ public class SpeechToTextServiceImpl implements SpeechToTextService {
         return "Convert exception";
     }
 
-    private String convertSpelledOutNumbersToNumerals(String text) {
+    @Override
+    public String convertSpelledOutNumbersToNumerals(String text) {
         String[] words = text.split("\\s+");
         StringBuilder result = new StringBuilder();
 
@@ -51,5 +56,59 @@ public class SpeechToTextServiceImpl implements SpeechToTextService {
         }
 
         return result.toString().trim();
+    }
+
+    @Override
+    public String convertSpelledNumericalDigitsToNumber(String text) {
+        String[] words = text.split(" ");
+        ArrayList<String> digits = new ArrayList<>(Arrays.asList("trillion", "billion", "million", "thousand", "hundred", "dollars", "and", "cents"));
+        BigDecimal result = BigDecimal.valueOf(0.00);
+        BigDecimal digit = BigDecimal.valueOf(0.00);
+
+        for (String word : words) {
+            if(digits.contains(word)) {
+                switch (word) {
+                    case ("trillion"):
+                        digit = digit.multiply(new BigDecimal("1000000000000"));
+                        result = result.add(digit);
+                        digit = new BigDecimal("0");
+                        break;
+                    case ("billion"):
+                        digit = digit.multiply(new BigDecimal("1000000000"));
+                        result = result.add(digit);
+                        digit = new BigDecimal("0");
+                        break;
+                    case ("million"):
+                        digit = digit.multiply(new BigDecimal("1000000"));
+                        result = result.add(digit);
+                        digit = new BigDecimal("0");
+                        break;
+                    case ("thousand"):
+                        digit = digit.multiply(new BigDecimal("1000"));
+                        result = result.add(digit);
+                        digit = new BigDecimal("0");
+                        break;
+                    case ("hundred"):
+                        digit = digit.multiply(new BigDecimal("100"));
+                        break;
+                    case ("dollars"):
+                        result = result.add(digit);
+                        digit = new BigDecimal("0");
+                        break;
+                    case ("cents"):
+                        digit = digit.divide(new BigDecimal("100"));
+                        result = result.add(digit);
+                        break;
+                    case ("and"):
+                        break;
+                    default:
+                        digit = new BigDecimal("-1");
+                }
+            } else {
+                digit = digit.add(new BigDecimal(word));
+            }
+        }
+
+        return result + "$";
     }
 }
