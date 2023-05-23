@@ -1,7 +1,9 @@
 package com.pandev.currencyratebot.controller;
 
 import com.pandev.currencyratebot.config.BotConfig;
+import com.pandev.currencyratebot.entity.Message;
 import com.pandev.currencyratebot.service.CurrencyService;
+import com.pandev.currencyratebot.service.MessageService;
 import com.pandev.currencyratebot.service.SpeechToTextService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,6 +31,8 @@ public class BotController extends TelegramLongPollingBot {
     private final CurrencyService currencyService;
 
     private final SpeechToTextService speechToTextService;
+
+    private final MessageService messageService;
 
     @Override
     public String getBotUsername() {
@@ -75,8 +79,12 @@ public class BotController extends TelegramLongPollingBot {
             } else {
                 reply = ((messageText.contains("$") && messageText.length() > 1) ||
                         (messageText.contains("тенге") && messageText.length() > 5)) ?
-                        currencyService.currencyExchange(messageText) : "Please enter value in $ or тенге.";
+                        currencyService.currencyExchange(messageText.replace(" ", "")) : "Please enter value in $ or тенге.";
             }
+
+            messageService.add(Message.builder().messageId(update.getMessage().getChatId())
+                    .userId(Long.valueOf(update.getMessage().getMessageId()))
+                    .message(reply.replace(" ", "")).build());
 
             sendMessage(chatId, reply);
         }

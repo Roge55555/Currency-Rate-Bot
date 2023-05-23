@@ -52,9 +52,9 @@ public class CurrencyServiceImpl implements CurrencyService {
     public String currencyExchange(String takenValue) {
 
         if (takenValue.contains("$")) {
-            return String.format("%,.2f", Double.parseDouble(takenValue.replace("$", "")) * getUsdToKztRate()) + " тенге";
+            return String.format("%,.2f", Double.parseDouble(takenValue.replace("$", "").replace(",", ".")) * getUsdToKztRate()) + " тенге";
         } else {
-            return String.format("%,.2f", Double.parseDouble(takenValue.replace("тенге", "")) / getUsdToKztRate()) + "$";
+            return String.format("%,.2f", Double.parseDouble(takenValue.replace("тенге", "").replace(",", ".")) / getUsdToKztRate()) + "$";
         }
     }
 }
