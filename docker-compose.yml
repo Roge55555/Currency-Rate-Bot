@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:14.0
+    environment:
+#      - POSTGRES_ROOT_PASSWORD=root
+      - POSTGRES_DB=crbotdb
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=user
+    ports:
+      - 5433:5432
+
+  pma:
+    depends_on:
+      - db
+    image: phpmyadmin/phpmyadmin
+    container_name: pma
+    restart: always
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 5432
+    ports:
+      - "8081:80"
+
+  app:
+    image: openjdk:11.0.10
+    ports:
+      - 8080:8080
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/crbotdb
+    depends_on:
+      - db
+    volumes:
+      - .\target\currencyratebot-0.0.1-SNAPSHOT.war:/currencyratebot/target/currencyratebot-0.0.1-SNAPSHOT.war
+    entrypoint: [ "java", "-jar", "/currencyratebot/target/currencyratebot-0.0.1-SNAPSHOT.war" ]
